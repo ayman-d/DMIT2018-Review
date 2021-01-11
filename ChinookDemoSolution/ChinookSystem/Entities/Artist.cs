@@ -25,5 +25,9 @@ namespace ChinookSystem.Entities
             get { return _Name; }
             set { _Name = string.IsNullOrEmpty(value) ? null : value; }
         }
+
+        // navigational property
+        // one to many relationship (one artist to many albums)
+        public virtual ICollection<Album> Albums { get; set; }
     }
 }

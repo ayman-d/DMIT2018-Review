@@ -51,5 +51,13 @@ namespace ChinookSystem.Entities
             get { return _ReleaseLabel; }
             set { _ReleaseLabel = string.IsNullOrEmpty(value) ? null : value; }
         }
+
+        // you can still use [NotMapped] annotations
+
+        // navigational properties (relational table property)
+        // many to one relationship (many albums to one artist)
+
+        public virtual Artist Artist { get; set; }
+        public virtual ICollection<Track> Tracks { get; set; }
     }
 }
