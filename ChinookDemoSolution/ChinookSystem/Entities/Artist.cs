@@ -19,17 +19,11 @@ namespace ChinookSystem.Entities
         [Key]
         public int ArtistId { get; set; }
 
-        [StringLength(120, ErrorMessage = "Name cannot be longer than 120 characters")]
+        [StringLength(120, ErrorMessage = "Name cannot be longer than 120 characters.")]
         public string Name
         {
-            get
-            {
-                return _Name;
-            }
-            set
-            {
-                _Name = string.IsNullOrEmpty(value) ? null : value;
-            }
+            get { return _Name; }
+            set { _Name = string.IsNullOrEmpty(value) ? null : value; }
         }
     }
 }
