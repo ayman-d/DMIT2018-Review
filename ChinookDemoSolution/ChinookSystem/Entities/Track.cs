@@ -41,5 +41,16 @@ namespace ChinookSystem.Entities
         public int? Bytes { get; set; }
 
         public decimal UnitPrice { get; set; }
+
+        // navigational properties
+
+        // many to one
+        public virtual Album Album { get; set; }
+
+        // many to one
+        public virtual Genre Genre { get; set; }
+
+        // many to one
+        public virtual MediaType MediaType { get; set; }
     }
 }
