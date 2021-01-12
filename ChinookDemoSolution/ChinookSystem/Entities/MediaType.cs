@@ -11,7 +11,24 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace ChinookSystem.Entities
 {
-    class MediaType
+    [Table("MediaTypes")]
+    internal class MediaType
     {
+        private string _Name;
+
+        [Key]
+        public int MediaTypeId { get; set; }
+
+        [StringLength(120, ErrorMessage = "Media Type Name cannot be longer than 120 characters.")]
+        public string Name 
+        { 
+            get { return _Name; }
+            set { _Name = string.IsNullOrEmpty(value) ? null : value; }
+        }
+
+        // navigational properties
+
+        // one to many
+        public virtual ICollection<Track> Tracks { get; set; }
     }
 }
