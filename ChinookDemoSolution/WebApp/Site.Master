@@ -13,7 +13,8 @@
     </asp:PlaceHolder>
     <webopt:BundleReference runat="server" Path="~/Content/css" />
     <link href="~/favicon.ico" rel="shortcut icon" type="image/x-icon" />
-
+    <%-- for font awesome icons --%>
+    <link href="css/font-awesome.css" rel="stylesheet" />
 </head>
 <body>
     <form runat="server">
@@ -106,7 +107,7 @@
                                         href="~/SamplePages/ArtistAlbums.aspx"
                                         style="color: black" runat="server">List All Artist Albums</a>
                                     <a class="dropdown-item"
-                                        href="~/SamplePages/SearchByDLL.aspx"
+                                        href="~/SamplePages/SearchByDDL.aspx"
                                         style="color: black" runat="server">Filter Search Sample</a>
                                 </div>
                             </li>
