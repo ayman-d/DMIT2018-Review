@@ -8,6 +8,8 @@ namespace ChinookSystem.Entities
 {
     internal partial class Album
     {
+        private string _ReleaseLabel;
+
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2214:DoNotCallOverridableMethodsInConstructors")]
         public Album()
         {
@@ -25,7 +27,11 @@ namespace ChinookSystem.Entities
         public int ReleaseYear { get; set; }
 
         [StringLength(50, ErrorMessage = "Release label cannot be longer than 50 characters long.")]
-        public string ReleaseLabel { get; set; }
+        public string ReleaseLabel 
+        { 
+            get { return _ReleaseLabel; }
+            set { _ReleaseLabel = string.IsNullOrEmpty(value) ? null : value; }
+        }
 
         public virtual Artist Artist { get; set; }
 

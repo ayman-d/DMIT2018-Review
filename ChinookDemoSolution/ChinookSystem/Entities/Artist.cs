@@ -8,6 +8,8 @@ namespace ChinookSystem.Entities
 {
     internal partial class Artist
     {
+        private string _Name;
+
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2214:DoNotCallOverridableMethodsInConstructors")]
         public Artist()
         {
@@ -17,7 +19,11 @@ namespace ChinookSystem.Entities
         public int ArtistId { get; set; }
 
         [StringLength(120, ErrorMessage = "Artist name cannot be longer than 120 characters")]
-        public string Name { get; set; }
+        public string Name 
+        { 
+            get { return _Name; }
+            set { _Name = string.IsNullOrEmpty(value) ? null : value; }
+        }
 
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
         public virtual ICollection<Album> Albums { get; set; }
