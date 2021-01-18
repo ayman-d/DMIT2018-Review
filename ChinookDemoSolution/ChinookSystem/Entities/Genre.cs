@@ -1,34 +1,25 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-#region Additionl Namespaces
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
-#endregion
+using System.Data.Entity.Spatial;
 
 namespace ChinookSystem.Entities
 {
-    [Table("Genres")]
-    internal class Genre
+    internal partial class Genre
     {
-        private string _Name;
-
-        [Key]
-        public int GenreId { get; set; }
-
-        [StringLength(120, ErrorMessage = "Genre Name cannot be longer than 120 characters.")]
-        public string Name 
-        { 
-            get { return _Name; }
-            set { _Name = string.IsNullOrEmpty(value) ? null : value; }
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2214:DoNotCallOverridableMethodsInConstructors")]
+        public Genre()
+        {
+            Tracks = new HashSet<Track>();
         }
 
-        // navigational properties
+        public int GenreId { get; set; }
 
-        // one to many
+        [StringLength(120)]
+        public string Name { get; set; }
+
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
         public virtual ICollection<Track> Tracks { get; set; }
     }
 }
