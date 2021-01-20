@@ -17,15 +17,15 @@ namespace ChinookSystem.Entities
 
         public int EmployeeId { get; set; }
 
-        [Required]
-        [StringLength(20)]
+        [Required(ErrorMessage = "Last Name is required.")]
+        [StringLength(20, ErrorMessage = "Last name cannot be longer than 20 characters.")]
         public string LastName { get; set; }
 
-        [Required]
-        [StringLength(20)]
+        [Required(ErrorMessage = "First Name is required.")]
+        [StringLength(20, ErrorMessage = "First name cannot be longer than 20 characters.")]
         public string FirstName { get; set; }
 
-        [StringLength(30)]
+        [StringLength(30, ErrorMessage = "Title cannot be longer than 30 characters.")]
         public string Title { get; set; }
 
         public int? ReportsTo { get; set; }
@@ -34,28 +34,28 @@ namespace ChinookSystem.Entities
 
         public DateTime? HireDate { get; set; }
 
-        [StringLength(70)]
+        [StringLength(70, ErrorMessage = "Address cannot be longer than 70 characters.")]
         public string Address { get; set; }
 
-        [StringLength(40)]
+        [StringLength(40, ErrorMessage = "City cannot be longer than 40 characters.")]
         public string City { get; set; }
 
-        [StringLength(40)]
+        [StringLength(40, ErrorMessage = "State cannot be longer than 40 characters.")]
         public string State { get; set; }
 
-        [StringLength(40)]
+        [StringLength(40, ErrorMessage = "Country cannot be longer than 40 characters.")]
         public string Country { get; set; }
 
-        [StringLength(10)]
+        [StringLength(10, ErrorMessage = "PostalCode cannot be longer than 10 characters.")]
         public string PostalCode { get; set; }
 
-        [StringLength(24)]
+        [StringLength(24, ErrorMessage = "Phon cannot be longer than 24 characters.")]
         public string Phone { get; set; }
 
-        [StringLength(24)]
+        [StringLength(24, ErrorMessage = "Fax cannot be longer than 24 characters.")]
         public string Fax { get; set; }
 
-        [StringLength(60)]
+        [StringLength(60, ErrorMessage = "Email cannot be longer than 60 characters.")]
         public string Email { get; set; }
 
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]

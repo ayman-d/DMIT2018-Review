@@ -19,14 +19,14 @@ namespace ChinookSystem.Entities
         public int AlbumId { get; set; }
 
         [Required(ErrorMessage = "Album title is required.")]
-        [StringLength(160, ErrorMessage = "Album title cannot be longer than 160 characters long.")]
+        [StringLength(160, ErrorMessage = "Album title cannot be longer than 160 characters.")]
         public string Title { get; set; }
 
         public int ArtistId { get; set; }
 
         public int ReleaseYear { get; set; }
 
-        [StringLength(50, ErrorMessage = "Release label cannot be longer than 50 characters long.")]
+        [StringLength(50, ErrorMessage = "Release label cannot be longer than 50 characters.")]
         public string ReleaseLabel 
         { 
             get { return _ReleaseLabel; }
