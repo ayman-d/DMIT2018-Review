@@ -79,16 +79,41 @@ namespace ChinookSystem.BLL
             using (var context = new ChinookSystemContext())
             {
                 AlbumItem results = (from x in context.Albums
-                                    where x.AlbumId == albumId
-                                    select new AlbumItem
-                                    {
-                                        AlbumId = x.AlbumId,
-                                        Title = x.Title,
-                                        ArtistId = x.ArtistId,
-                                        ReleaseYear = x.ReleaseYear,
-                                        ReleaseLabel = x.ReleaseLabel
-                                    }).FirstOrDefault();
+                                     where x.AlbumId == albumId
+                                     select new AlbumItem
+                                     {
+                                         AlbumId = x.AlbumId,
+                                         Title = x.Title,
+                                         ArtistId = x.ArtistId,
+                                         ReleaseYear = x.ReleaseYear,
+                                         ReleaseLabel = x.ReleaseLabel
+                                     }).FirstOrDefault();
                 return results;
+            }
+        }
+
+        [DataObjectMethod(DataObjectMethodType.Select, false)]
+        public List<AlbumWithSongs> Album_GetAlbumWithSongs()
+        {
+            using (var context = new ChinookSystemContext())
+            {
+                IEnumerable<AlbumWithSongs> results = context.Albums
+                                                        .Where(x => x.Tracks.Count() >= 25)
+                                                        .Select(x => new AlbumWithSongs
+                                                        {
+                                                            Title = x.Title,
+                                                            Artist = x.Artist.Name,
+                                                            TrackCount = x.Tracks.Count(),
+                                                            Songs = (
+                                                                x.Tracks
+                                                                    .Select(y => new SongFromAlbum
+                                                                    {
+                                                                        SongName = y.Name,
+                                                                        LengthInSeconds = y.Milliseconds * 0.001
+                                                                    })
+                                                            )
+                                                        });
+                return results.ToList();
             }
         }
         #endregion
