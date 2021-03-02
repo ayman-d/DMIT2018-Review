@@ -20,10 +20,20 @@ namespace ChinookSystem.BLL
         {
             using (var context = new ChinookSystemContext())
             {
-               
-                //code to go here
 
-                return null;
+                //code to go here
+                var results = context.PlaylistTracks
+                                .Where(x => x.Playlist.Name.Equals(playlistname) && x.Playlist.UserName.Equals(username))
+                                .OrderBy(x => x.TrackNumber)
+                                .Select(x => new UserPlaylistTrack
+                                {
+                                    TrackID = x.Track.TrackId,
+                                    TrackNumber = x.TrackNumber,
+                                    TrackName = x.Track.Name,
+                                    Milliseconds = x.Track.Milliseconds,
+                                    UnitPrice = x.Track.UnitPrice
+                                });
+                return results.ToList();
             }
         }//eom
         public void Add_TrackToPLaylist(string playlistname, string username, int trackid)

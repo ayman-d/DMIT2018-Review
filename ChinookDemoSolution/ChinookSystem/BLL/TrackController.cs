@@ -55,7 +55,7 @@ namespace ChinookSystem.BLL
                 List<TrackList> results = context.Tracks
                                             .Where(x => x.Album.Artist.Name.Contains(arg) && tracksby.Equals("Artist") 
                                                     || x.Album.Title.Contains(arg) && tracksby.Equals("Album")
-                                                    || x.Genre.Name.Contains(arg) && tracksby.Equals("Genre"))
+                                                    || x.Genre.Name.Equals(arg) && tracksby.Equals("Genre"))
                                             .OrderBy(x => x.Name)
                                             .Select(x => new TrackList
                                             {

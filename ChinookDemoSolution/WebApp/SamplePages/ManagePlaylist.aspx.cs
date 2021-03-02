@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Web.UI.WebControls;
 
 #region Additonal Namespaces
@@ -48,7 +49,12 @@ namespace WebApp.SamplePages
 
             //code to go here
             TracksBy.Value = "Genre";
+            // this DDL doesn't have a prompt so we don't need to test for empty value
+            // this only works if the text is unique, otherwise use SelectedValue
             SearchArg.Value = GenreDDL.SelectedItem.Text;
+
+            // we can also use the selected value string and adjust the BLL to look for the id instead
+            //SearchArg.Value = GenreDDL.SelectedValue.ToString();
 
             TracksSelectionList.DataBind();
         }
@@ -71,8 +77,28 @@ namespace WebApp.SamplePages
 
         protected void PlayListFetch_Click(object sender, EventArgs e)
         {
+            // temporary user value until security is implemented
+            string username = "HansenB";
             //code to go here
- 
+            if (string.IsNullOrEmpty(PlaylistName.Text))
+            {
+                MessageUserControl.ShowInfo("PlayList Search", "No playlist name was provided.");
+            } else
+            {
+                // use user friendly error handling using MessageUserControl
+                // instead of using try/catch
+                // MessageUserControl has the try/catch embedded within the control
+                // within it, there exists a TryRun() method
+                // username is coming from the system via security (later)
+                MessageUserControl.TryRun(() => 
+                {
+                    // code to execute under error handling control of MessageUserControl
+                    PlaylistTracksController sysmgr = new PlaylistTracksController();
+                    List<UserPlaylistTrack> info = sysmgr.List_TracksForPlaylist(PlaylistName.Text, username);
+                    PlayList.DataSource = info;
+                    PlayList.DataBind();
+                },/* success message title and body */"PlayList Search", "View the requested playlist tracks below");
+            }
         }
 
         protected void MoveDown_Click(object sender, EventArgs e)
