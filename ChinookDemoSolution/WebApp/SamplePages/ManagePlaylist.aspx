@@ -69,6 +69,8 @@
                             </asp:LinkButton>
                         </td>
                         <td>
+                            <%-- We can also hide a control that holds the track ID --%>
+                            <%--<asp:Label Text='<%# Eval("TrackID") %>' runat="server" ID="TrackIDLabel" visible="false"></asp:Label>--%>
                             <asp:Label Text='<%# Eval("Name") %>' runat="server" ID="NameLabel" /></td>
                         <td>
                             <asp:Label Text='<%# Eval("Title") %>' runat="server" ID="TitleLabel" /></td>

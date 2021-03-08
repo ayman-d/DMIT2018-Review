@@ -94,9 +94,7 @@ namespace WebApp.SamplePages
                 {
                     // code to execute under error handling control of MessageUserControl
                     PlaylistTracksController sysmgr = new PlaylistTracksController();
-                    List<UserPlaylistTrack> info = sysmgr.List_TracksForPlaylist(PlaylistName.Text, username);
-                    PlayList.DataSource = info;
-                    PlayList.DataBind();
+                    RefreshPlayList(sysmgr, username);
                 },/* success message title and body */"PlayList Search", "View the requested playlist tracks below");
             }
         }
@@ -130,9 +128,35 @@ namespace WebApp.SamplePages
             ListViewCommandEventArgs e)
         {
             //code to go here
-            
+            string username = "HansenB";
+
+            //validate playlist exists
+            if (string.IsNullOrEmpty(PlaylistName.Text))
+            {
+                MessageUserControl.ShowInfo("Missing Data", "No playlist name was provided.");
+            } else
+            {
+                // grab a value from the selected ListView row (song)
+                // the row is referred to as e.Item
+                // to access the column: use the (.FindControl("xxx") as ctrlType).ctrlAccess
+                string song = (e.Item.FindControl("NameLabel") as Label).Text;
+                MessageUserControl.TryRun(() =>
+                {
+                    PlaylistTracksController sysmgr = new PlaylistTracksController();
+                    sysmgr.Add_TrackToPLaylist(PlaylistName.Text, username, int.Parse(e.CommandArgument.ToString()), song);
+                    RefreshPlayList(sysmgr, username);
+                }, "Add track to PlayList", "Track has been added to PlayList");
+            }
         }
 
+        protected void RefreshPlayList(PlaylistTracksController sysmgr, string username)
+        {
+            List<UserPlaylistTrack> info = sysmgr.List_TracksForPlaylist(PlaylistName.Text, username);
+            PlayList.DataSource = info;
+            PlayList.DataBind();
+        }
+
+        // ERROR HANDLING
         #region ErrorHandling Methods for ODS
         protected void SelectCheckForException(object sender, ObjectDataSourceStatusEventArgs e)
         {
