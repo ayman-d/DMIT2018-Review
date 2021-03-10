@@ -140,7 +140,7 @@ namespace ChinookSystem.BLL
                     // time to commit to SQL
                     // check: are there any errors in this transaction
                     // brokenRules is a List<Exception>
-                    if (brokenRules.Count() > 0)
+                    if (brokenRules.Count > 0)
                     {
                         // at least one error was recorded during the processing of the transaction
                         throw new BusinessRuleCollectionException("Add Playlist Track Concerns", brokenRules);
@@ -154,7 +154,7 @@ namespace ChinookSystem.BLL
                 }
             }
         }//eom
-        public void MoveTrack(string username, string playlistname, int trackid, int tracknumber, string direction)
+        public void MoveTrack(MoveTrackItem moveTrackItem)
         {
             using (var context = new ChinookSystemContext())
             {
@@ -168,8 +168,84 @@ namespace ChinookSystem.BLL
         {
             using (var context = new ChinookSystemContext())
             {
-               //code to go here
+                //code to go here
+                if (string.IsNullOrEmpty(playlistname))
+                {
+                    // there is a data error, we need to set up an error message
+                    // arg1 is the message, arg2 is the type of the data item name, arg3 is the value we are checking
+                    brokenRules.Add(new BusinessRuleException<string>("Playlist name is not provided.", nameof(playlistname), playlistname));
+                }
+                else if (string.IsNullOrEmpty(username))
+                {
+                    // do the same for the username
+                    brokenRules.Add(new BusinessRuleException<string>("User name is not provided.", nameof(username), username));
+                }
+                else if (trackstodelete.Count == 0)
+                {
+                    // do the same for the trackstodelete list count
+                    // we can also say BusinessRuleException<int> and make the last argument 0 instead of "0"
+                    brokenRules.Add(new BusinessRuleException<string>("You did not select any tracks to delete", "Track Count", "0"));
+                } 
+                else
+                {
+                    Playlist playlistExists = context.Playlists
+                                                .Where(x => x.Name.Equals(playlistname) && x.UserName.Equals(username))
+                                                .Select(x => x).FirstOrDefault();
 
+                    if (playlistExists == null)
+                    {
+                        brokenRules.Add(new BusinessRuleException<string>("Playlist does not exist", nameof(playlistname), playlistname));
+                    }
+                    else
+                    {
+                        // grab a list of tracks that are to be kept
+                        var tracksToKeep = context.PlaylistTracks
+                                            .Where(x => x.Playlist.Name.Equals(playlistname)
+                                                    && x.Playlist.UserName.Equals(username)
+                                                    && !trackstodelete.Any(y => y == x.TrackId))
+                                            .OrderBy(x => x.TrackNumber)
+                                            .Select(x => x);
+                        // remove the desired tracks to be deleted
+                        PlaylistTrack item = null;
+                        foreach (int deleteTrackId in trackstodelete)
+                        {
+                            item = context.PlaylistTracks
+                                    .Where(x => x.Playlist.Name.Equals(playlistname)
+                                            && x.Playlist.UserName.Equals(username)
+                                            && x.TrackId == deleteTrackId)
+                                    .Select(x => x).FirstOrDefault();
+
+                            if (item != null)
+                            {
+                                // staged
+                                // parent.navProperty.action
+                                playlistExists.PlaylistTracks.Remove(item);
+                            }
+                        }
+                        // re-sequence the kept tracks
+                        // option a) use a list and update the records of the list
+                        // option b) delete all children records and re-add only the kept records
+
+                        // using option a
+                        int trackNumber = 1;
+                        foreach (var track in tracksToKeep)
+                        {
+                            track.TrackNumber = trackNumber;
+                            context.Entry(track).Property(nameof(PlaylistTrack.TrackNumber)).IsModified = true; // staged ONLY
+                            trackNumber++;
+                        }
+
+                        // save the transaction
+                        if (brokenRules.Count() > 0)
+                        {
+                            throw new BusinessRuleCollectionException("Track removal concerns:", brokenRules);
+                        }
+                        else
+                        {
+                            context.SaveChanges();
+                        }
+                    }
+                }
 
             }
         }//eom
