@@ -137,30 +137,170 @@ namespace ChinookSystem.BLL
                     // INSTEAD do the staging using the parent.navProperty.Add(xxx)
                     playlistExists.PlaylistTracks.Add(playlistTrackExists);
 
-                    // time to commit to SQL
-                    // check: are there any errors in this transaction
-                    // brokenRules is a List<Exception>
-                    if (brokenRules.Count > 0)
-                    {
-                        // at least one error was recorded during the processing of the transaction
-                        throw new BusinessRuleCollectionException("Add Playlist Track Concerns", brokenRules);
-                    }
-                    else
-                    {
-                        // COMMIT THE TRANSACTION
-                        // send ALL the staged records to SQL for processing
-                        context.SaveChanges();
-                    }
+                    
                 }
-            }
+
+                // time to commit to SQL
+                // check: are there any errors in this transaction
+                // brokenRules is a List<Exception>
+                if (brokenRules.Count > 0)
+                {
+                    // at least one error was recorded during the processing of the transaction
+                    throw new BusinessRuleCollectionException("Add Playlist Track Concerns", brokenRules);
+                }
+                else
+                {
+                    // COMMIT THE TRANSACTION
+                    // send ALL the staged records to SQL for processing
+                    context.SaveChanges();
+                }
+            } // eou
         }//eom
+
         public void MoveTrack(MoveTrackItem moveTrackItem)
         {
             using (var context = new ChinookSystemContext())
             {
                 //code to go here 
+                if (string.IsNullOrEmpty(moveTrackItem.PlaylistName))
+                {
+                    // there is a data error, we need to set up an error message
+                    // arg1 is the message, arg2 is the type of the data item name, arg3 is the value we are checking
+                    brokenRules.Add(new BusinessRuleException<string>("Playlist name is not provided.", 
+                                                                        nameof(MoveTrackItem.PlaylistName), 
+                                                                        moveTrackItem.PlaylistName));
+                }
+                else if (string.IsNullOrEmpty(moveTrackItem.UserName))
+                {
+                    // do the same for the username
+                    brokenRules.Add(new BusinessRuleException<string>("User name is not provided.", 
+                                                                        nameof(MoveTrackItem.UserName), 
+                                                                        moveTrackItem.UserName));
+                }
+                else if (moveTrackItem.TrackId <= 0)
+                {
+                    // do the same for the username
+                    brokenRules.Add(new BusinessRuleException<int>("Invalid track identifier was supplied", 
+                                                                    nameof(MoveTrackItem.TrackId), 
+                                                                    moveTrackItem.TrackId));
+                }
+                else if (moveTrackItem.TrackNumber <= 0)
+                {
+                    // do the same for the username
+                    brokenRules.Add(new BusinessRuleException<int>("Invalid track identifier was supplied", 
+                                                                    nameof(MoveTrackItem.TrackNumber), 
+                                                                    moveTrackItem.TrackNumber));
+                }
 
-            }
+                Playlist playlistExists = context.Playlists
+                                                .Where(x => x.Name.Equals(moveTrackItem.PlaylistName) && x.UserName.Equals(moveTrackItem.UserName))
+                                                .Select(x => x).FirstOrDefault();
+
+                if (playlistExists == null)
+                {
+                    brokenRules.Add(new BusinessRuleException<string>("Playlist does not exist", nameof(MoveTrackItem.PlaylistName), moveTrackItem.PlaylistName));
+                } else
+                {
+                    PlaylistTrack trackExists = context.PlaylistTracks
+                                                    .Where(x => x.Playlist.Name.Equals(moveTrackItem.PlaylistName)
+                                                        && x.Playlist.UserName.Equals(moveTrackItem.UserName)
+                                                        && x.TrackId == moveTrackItem.TrackId)
+                                                    .Select(x => x).FirstOrDefault();
+
+                    if (trackExists == null)
+                    {
+                        brokenRules.Add(new BusinessRuleException<string>("Track does not exist on the Playlist. Refresh your playlist display.", 
+                                                                            nameof(MoveTrackItem.PlaylistName), 
+                                                                            moveTrackItem.PlaylistName));
+                    }
+                    else
+                    {
+                        // decide the logic depending on direction
+                        if (moveTrackItem.Direction.Equals("up"))
+                        {
+                            // move up
+                            // business process check: already at the top
+                            if (trackExists.TrackNumber == 1)
+                            {
+                                brokenRules.Add(new BusinessRuleException<string>("Track already at the top, refresh your display.",
+                                                                            nameof(Track.Name),
+                                                                            trackExists.Track.Name));
+                            }
+                            else
+                            {
+                                // get the other track
+                                PlaylistTrack otherTrack = context.PlaylistTracks
+                                                    .Where(x => x.Playlist.Name.Equals(moveTrackItem.PlaylistName)
+                                                        && x.Playlist.UserName.Equals(moveTrackItem.UserName)
+                                                        && x.TrackNumber == trackExists.TrackNumber - 1)
+                                                    .Select(x => x).FirstOrDefault();
+
+                                if (otherTrack == null)
+                                {
+                                    brokenRules.Add(new BusinessRuleException<string>("Track to swap with doesn't exist, refresh your display.",
+                                                                            nameof(MoveTrackItem.PlaylistName),
+                                                                            moveTrackItem.PlaylistName));
+                                }
+                                else
+                                {
+                                    // change the track numbers
+                                    trackExists.TrackNumber--;
+                                    otherTrack.TrackNumber++;
+                                    // stage
+                                    context.Entry(trackExists).Property(nameof(PlaylistTrack.TrackNumber)).IsModified = true;
+                                    context.Entry(otherTrack).Property(nameof(PlaylistTrack.TrackNumber)).IsModified = true;
+                                }
+                            }
+                        }
+                        else
+                        {
+                            // move down
+                            // business process check: already at the bottom
+                            if (trackExists.TrackNumber == playlistExists.PlaylistTracks.Count)
+                            {
+                                brokenRules.Add(new BusinessRuleException<string>("Track already at the bottom, refresh your display.",
+                                                                            nameof(Track.Name),
+                                                                            trackExists.Track.Name));
+                            }
+                            else
+                            {
+                                // get the other track
+                                PlaylistTrack otherTrack = context.PlaylistTracks
+                                                    .Where(x => x.Playlist.Name.Equals(moveTrackItem.PlaylistName)
+                                                        && x.Playlist.UserName.Equals(moveTrackItem.UserName)
+                                                        && x.TrackNumber == trackExists.TrackNumber + 1)
+                                                    .Select(x => x).FirstOrDefault();
+
+                                if (otherTrack == null)
+                                {
+                                    brokenRules.Add(new BusinessRuleException<string>("Track to swap with doesn't exist, refresh your display.",
+                                                                            nameof(MoveTrackItem.PlaylistName),
+                                                                            moveTrackItem.PlaylistName));
+                                }
+                                else
+                                {
+                                    // change the track numbers
+                                    trackExists.TrackNumber++;
+                                    otherTrack.TrackNumber--;
+                                    // stage
+                                    context.Entry(trackExists).Property(nameof(PlaylistTrack.TrackNumber)).IsModified = true;
+                                    context.Entry(otherTrack).Property(nameof(PlaylistTrack.TrackNumber)).IsModified = true;
+                                }
+                            }
+                        }   
+                    }   
+                }
+                // final check and commit
+                if (brokenRules.Count() > 0)
+                {
+                    throw new BusinessRuleCollectionException("Track movement concerns:", brokenRules);
+                }
+                else
+                {
+                    // commit
+                    context.SaveChanges();
+                }
+            } // eou
         }//eom
 
 
@@ -235,19 +375,21 @@ namespace ChinookSystem.BLL
                             trackNumber++;
                         }
 
-                        // save the transaction
-                        if (brokenRules.Count() > 0)
-                        {
-                            throw new BusinessRuleCollectionException("Track removal concerns:", brokenRules);
-                        }
-                        else
-                        {
-                            context.SaveChanges();
-                        }
+                        
                     }
                 }
 
-            }
+                // save the transaction
+                if (brokenRules.Count() > 0)
+                {
+                    throw new BusinessRuleCollectionException("Track removal concerns:", brokenRules);
+                }
+                else
+                {
+                    context.SaveChanges();
+                }
+
+            } // eou
         }//eom
     }
 }
